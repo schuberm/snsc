@@ -1,0 +1,47 @@
+commit 0675ffc1bca7f546158d5e329bad7f22983f22f3
+Author: Samuel Huberman <schuberm@schuberm-R307.(none)>
+Date:   Wed Jan 23 13:32:33 2013 -0500
+
+    command line argument functionality
+
+commit b3179282346359e112362a53a62a37327be66f97
+Author: Samuel Huberman <samuel.huberman@gmail.com>
+Date:   Sat Jan 19 15:57:25 2013 -0500
+
+    makefile is working
+
+commit d7f8afca8bf5ab0cb1d1f11b3fa54e8d303dedc5
+Author: Samuel Huberman <samuel.huberman@gmail.com>
+Date:   Fri Jan 18 14:58:45 2013 -0500
+
+    added include guards
+
+commit cee48fff9b54ead56f59afae182e5d87028a53fc
+Author: Samuel Huberman <samuel.huberman@gmail.com>
+Date:   Fri Jan 18 14:23:15 2013 -0500
+
+    compiles and generates data, makefile not working
+
+commit 4ef31b669b45dfee42cc690298d444958b025230
+Author: Samuel Huberman <samuel.huberman@gmail.com>
+Date:   Fri Jan 18 14:18:06 2013 -0500
+
+    header, cc and main version
+
+commit 402f81967b83b8d212e4f08453dacc74c4c42194
+Author: Samuel Huberman <samuel.huberman@gmail.com>
+Date:   Fri Jan 18 00:32:16 2013 -0500
+
+    added makefile
+
+commit 72daf75589422b3c58881a95c9c788dd7a40dee4
+Author: Samuel Huberman <samuel.huberman@gmail.com>
+Date:   Fri Jan 18 00:22:53 2013 -0500
+
+    tested all functions
+
+commit 42a54327aa5f2f5a4f7cec6086ba725777f3a057
+Author: Samuel Huberman <samuel.huberman@gmail.com>
+Date:   Fri Jan 18 00:17:36 2013 -0500
+
+    single file outline
