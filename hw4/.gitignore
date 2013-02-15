@@ -1,0 +1,7 @@
+*~
+*.o
+*.bin
+difftest
+tracertest
+combotest
+coupled
