@@ -1,0 +1,3 @@
+sumone: all ncrements get truncated
+sumreverse: works until difference between sum and increments is too large
+Solution: implement something like the Kahan summation algorithm
