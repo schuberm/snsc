@@ -1,0 +1,2 @@
+module purge
+module load gcc git extras Xlibraries ImageMagick
