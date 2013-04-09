@@ -103,43 +103,6 @@ void calculate_forces_fastest(NBody *data, int n)
 
 void calculate_forces_omp(NBody *data, int n)
 {
-#pragma omp parallel shared(data,n) default(none)
-{
-//#pragma omp for schedule(static,4)
-		for (int i=0;i<n;i++) {
-			for (int j=0;j<NDIM;j++) {
-				data[i].f[j]=0; 
-			}
-			data[i].PE = 0.;
-		}
-
-#pragma omp for schedule(static,4)
-		for (int i=0;i<n;i++){
-			for (int j=0;j<n;j++) {
-				double rsq=EPS*EPS, dx[NDIM],forcex;
-				for (int k=0;k<NDIM;k++){
-					dx[k]=data[j].x[k]-data[i].x[k];
-					rsq+=dx[k]*dx[k];
-				}
-				if (j==i){
-					for (int k=0;k<NDIM;k++)
-						data[i].f[k]+=0;
-				}
-				else{
-					double ir =1./sqrt(rsq);
-					rsq=ir/rsq;
-					for (int k=0;k<NDIM;k++)
-					{
-						forcex=rsq*dx[k] * data[i].mass * data[j].mass * GRAVCONST;
-						data[i].f[k] += forcex;
-						//data[j].f[k] -= forcex;
-					}
-					data[i].PE -= GRAVCONST * data[i].mass * data[j].mass * ir;
-					//data[j].PE -= GRAVCONST * data[i].mass * data[j].mass * ir;
-				}
-			}
-		}
-	}
 }
 
 /*------------------------------------------------------------------*/
@@ -173,55 +136,6 @@ typedef double Vector[3];
 /*------------------------------------------------------------------*/
 
 void calculate_forces_fastest_omp(NBody *data, int n) 
-{
-}
-
-/*------------------------------------------------------------------*/
-
-void calculate_forces_twice_omp(NBody *data, int n) 
-{
-#pragma omp parallel shared(data,n) default(none)
-{
-#pragma omp for schedule(static,4)
-		for (int i=0;i<n;i++) {
-			for (int j=0;j<NDIM;j++) {
-				data[i].f[j]=0; 
-			}
-			data[i].PE = 0.;
-		}
-
-#pragma omp for schedule(static,4)
-		for (int i=0;i<n;i++){
-			for (int j=0;j<n;j++) {
-				double rsq=EPS*EPS, dx[NDIM],forcex;
-				for (int k=0;k<NDIM;k++){
-					dx[k]=data[j].x[k]-data[i].x[k];
-					rsq+=dx[k]*dx[k];
-				}
-				if (j==i){
-					for (int k=0;k<NDIM;k++)
-						data[i].f[k]+=0;
-				}
-				else{
-					double ir =1./sqrt(rsq);
-					rsq=ir/rsq;
-					for (int k=0;k<NDIM;k++)
-					{
-						forcex=rsq*dx[k] * data[i].mass * data[j].mass * GRAVCONST;
-						data[i].f[k] += forcex;
-						//data[j].f[k] -= forcex;
-					}
-					data[i].PE -= GRAVCONST * data[i].mass * data[j].mass * ir;
-					//data[j].PE -= GRAVCONST * data[i].mass * data[j].mass * ir;
-				}
-			}
-		}
-	}
-}
-
-/*------------------------------------------------------------------*/
-
-void calculate_forces_buffer_omp(NBody *data, int n) 
 {
 int i;
 int j;
@@ -273,6 +187,111 @@ double ir;
 			}
 		}
 	}
+
+}
+
+/*------------------------------------------------------------------*/
+
+void calculate_forces_twice_omp(NBody *data, int n) 
+{
+#pragma omp parallel shared(data,n) default(none)
+	{
+#pragma omp for schedule(static,4)
+		for (int i=0;i<n;i++) {
+			for (int j=0;j<NDIM;j++) {
+				data[i].f[j]=0; 
+			}
+			data[i].PE = 0.;
+		}
+
+#pragma omp for schedule(static,4)
+		for (int i=0;i<n;i++){
+			for (int j=0;j<n;j++) {
+				double rsq=EPS*EPS, dx[NDIM],forcex;
+				for (int k=0;k<NDIM;k++){
+					dx[k]=data[j].x[k]-data[i].x[k];
+					rsq+=dx[k]*dx[k];
+				}
+				if (j==i){
+					for (int k=0;k<NDIM;k++)
+						data[i].f[k]+=0;
+				}
+				else{
+					double ir =1./sqrt(rsq);
+					rsq=ir/rsq;
+					for (int k=0;k<NDIM;k++)
+					{
+						forcex=rsq*dx[k] * data[i].mass * data[j].mass * GRAVCONST;
+						data[i].f[k] += forcex;
+						//data[j].f[k] -= forcex;
+					}
+					data[i].PE -= GRAVCONST * data[i].mass * data[j].mass * ir;
+					//data[j].PE -= GRAVCONST * data[i].mass * data[j].mass * ir;
+				}
+			}
+		}
+	}
+}
+
+/*------------------------------------------------------------------*/
+
+void calculate_forces_buffer_omp(NBody *data, int n) 
+{
+		for (int a=0;a<n;a++) {
+			for (int b=0;b<NDIM;b++) {
+				data[a].f[b]=0.0;
+			}
+			data[a].PE = 0.;
+		}
+
+#pragma omp parallel default(none) shared(data,n)
+	{
+
+		double *tempforce;
+		tempforce = (double*)malloc(n*NDIM*sizeof(*tempforce));
+		double *temppe;
+		temppe = (double*)malloc(n*sizeof(*temppe));
+
+		for (int a=0;a<n;a++) {
+			for (int b=0;b<NDIM;b++) {
+				tempforce[a*NDIM+b]=0.0; 
+			}
+			temppe[a]=0.0;
+		}
+
+#pragma omp for schedule(static,4)
+		for (int i=0;i<n;i++){
+			for (int j=0;j<i;j++) {
+				double forcex=0.0;
+				double rsq=EPS*EPS;
+				double dx[NDIM];
+				for (int k=0;k<NDIM;k++){
+					dx[k]=data[j].x[k]-data[i].x[k];
+					rsq+=dx[k]*dx[k];
+				}
+				double ir =1./sqrt(rsq);
+				rsq=ir/rsq;
+				for (int k=0;k<NDIM;k++)
+				{
+					forcex=rsq*dx[k] * data[i].mass * data[j].mass * GRAVCONST;
+					tempforce[i*NDIM+k]+=forcex;
+					tempforce[j*NDIM+k]-=forcex;
+				}
+				temppe[i] -= GRAVCONST * data[i].mass * data[j].mass * ir;
+				temppe[j] -= GRAVCONST * data[i].mass * data[j].mass * ir;
+			}
+		}
+		for (int i=0;i<n;i++){
+			for (int k=0;k<NDIM;k++){
+				#pragma omp critical
+				data[i].f[k]+=tempforce[i*NDIM+k];
+			}
+			#pragma omp critical
+			data[i].PE+=temppe[i];
+		}
+		free(tempforce);
+		free(temppe);	
+	}
 }
 
 /*------------------------------------------------------------------*/
@@ -281,8 +300,8 @@ void calculate_forces(NBody *data, int n)
 {
 	//calculate_forces_fastest(data,n);
 	//calculate_forces_omp(data,n);
-	//calculate_forces_twice_omp(data,n);
-	calculate_forces_buffer_omp(data,n);
+	calculate_forces_twice_omp(data,n);
+	//calculate_forces_buffer_omp(data,n);
 	//calculate_forces_fastest_omp(data,n);				  
 	return;
 }
@@ -476,7 +495,7 @@ int main(int argc, char *argv[])
 		time += dt;
 		if (output) {
 			printf("%i\t%g\t%g\t%g\n", i, dt, time, tote);
-//			if (!(i % outevery)) display_particles(mydata,1.3,npts);
+			//			if (!(i % outevery)) display_particles(mydata,1.3,npts);
 		}
 	}
 
