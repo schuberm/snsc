@@ -1,0 +1,2 @@
+timings64.txt: Increasing number of threads increases the execution time. My guess is that the program is spending more time waiting for the threads to finishes than actually computing. When the OMP_NUM_TTHREADS*np>16, the time was manually set to zero since the execution was significantly longer.
+timings2nodes.txt: Faster than the single node cases, but increasingthe number of threads still increases the execution time. 
